@@ -52,12 +52,13 @@
         :key="painting.id"
         class="border rounded-xl overflow-hidden shadow-sm"
       >
-        <NuxtImg
+        <img
           :src="painting.image_url"
           :alt="painting.title"
           class="w-full h-64 object-cover"
           loading='lazy'
-        />
+          decoding="async"
+        >
 
         <div class="p-4">
           <h2 class="text-xl font-bold">
