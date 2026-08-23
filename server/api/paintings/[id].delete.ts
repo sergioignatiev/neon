@@ -1,6 +1,5 @@
 import { db } from '../../db'
-import { unlink } from 'node:fs/promises'
-import path from 'node:path'
+import { del } from '@vercel/blob'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
@@ -31,22 +30,7 @@ export default defineEventHandler(async (event) => {
     [id]
   )
 
-  if (imageUrl.startsWith('/paintings/')) {
-    const filename = path.basename(imageUrl)
-
-    const filePath = path.join(
-      process.cwd(),
-      'public',
-      'paintings',
-      filename
-    )
-
-    try {
-      await unlink(filePath)
-    } catch {
-      console.log('Image file not found:', filePath)
-    }
-  }
+  await del(imageUrl)
 
   return {
     success: true
