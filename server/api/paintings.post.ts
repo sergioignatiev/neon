@@ -1,7 +1,10 @@
 import { db } from '../db'
+import { optimizeImage } from '../utils/optimizeImage'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
+
+  const optimizedImageUrl = await optimizeImage(body.image_url)
 
   await db.query(
     `INSERT INTO paintings 
@@ -10,7 +13,7 @@ export default defineEventHandler(async (event) => {
     [
       body.title,
       body.year,
-      body.image_url,
+      optimizedImageUrl,
       body.description,
       body.author
     ]

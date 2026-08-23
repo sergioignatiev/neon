@@ -72,6 +72,12 @@
           <p class="mt-3 text-gray-700">
             {{ painting.description }}
           </p>
+          <button
+  class="mt-4 bg-red-600 text-white rounded-lg px-4 py-2 hover:bg-red-700"
+  @click="deletePainting(painting.id)"
+>
+  Удалить
+</button>
         </div>
       </div>
     </div>
@@ -104,6 +110,13 @@ async function addPainting() {
   image_url.value = ''
   description.value = ''
   author.value = ''
+
+  await refresh()
+}
+async function deletePainting(id: number) {
+  await $fetch(`/api/paintings/${id}`, {
+    method: 'DELETE'
+  })
 
   await refresh()
 }
