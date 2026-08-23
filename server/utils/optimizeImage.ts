@@ -1,7 +1,6 @@
 import sharp from 'sharp'
 import { randomUUID } from 'node:crypto'
-import { mkdir } from 'node:fs/promises'
-import path from 'node:path'
+import { put } from '@vercel/blob'
 
 export async function optimizeImage(imageUrl: string) {
   const response = await fetch(imageUrl)
@@ -14,15 +13,7 @@ export async function optimizeImage(imageUrl: string) {
 
   const filename = `${randomUUID()}.webp`
 
-  const folder = path.join(
-    process.cwd(),
-    'public',
-    'paintings'
-  )
-
-  await mkdir(folder, { recursive: true })
-
-  await sharp(buffer)
+  const optimizedImage = await sharp(buffer)
     .resize({
       width: 1200,
       withoutEnlargement: true
@@ -30,7 +21,12 @@ export async function optimizeImage(imageUrl: string) {
     .webp({
       quality: 80
     })
-    .toFile(path.join(folder, filename))
+    .toBuffer()
 
-  return `/paintings/${filename}`
+  const blob = await put(`paintings/${filename}`, optimizedImage, {
+    access: 'public',
+    contentType: 'image/webp'
+  })
+
+  return blob.url
 }
