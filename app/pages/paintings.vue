@@ -20,9 +20,11 @@
       >
 
       <input
-        v-model="image_url"
+        ref="fileInput"
+        type="file"
+        accept="image/*"
         class="border rounded-lg px-4 py-2"
-        placeholder="URL изображения"
+        @change="handleImageChange"
       >
 
       <input
@@ -39,7 +41,7 @@
 
       <button
         class="bg-black text-white rounded-lg px-4 py-2 hover:bg-gray-800"
-        @click="addPainting()"
+        @click="addPainting"
       >
         Добавить
       </button>
@@ -56,7 +58,7 @@
           :src="painting.image_url"
           :alt="painting.title"
           class="w-full h-64 object-cover"
-          loading='lazy'
+          loading="lazy"
           decoding="async"
         >
 
@@ -72,12 +74,13 @@
           <p class="mt-3 text-gray-700">
             {{ painting.description }}
           </p>
+
           <button
-  class="mt-4 bg-red-600 text-white rounded-lg px-4 py-2 hover:bg-red-700"
-  @click="deletePainting(painting.id)"
->
-  Удалить
-</button>
+            class="mt-4 bg-red-600 text-white rounded-lg px-4 py-2 hover:bg-red-700"
+            @click="deletePainting(painting.id)"
+          >
+            Удалить
+          </button>
         </div>
       </div>
     </div>
@@ -87,32 +90,51 @@
 <script setup lang="ts">
 const title = ref('')
 const year = ref<number | null>(null)
-const image_url = ref('')
 const description = ref('')
 const author = ref('')
+
+const imageFile = ref<File | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
+
+function handleImageChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  imageFile.value = input.files?.[0] || null
+}
 
 const { data, refresh } = await useFetch('/api/paintings')
 
 async function addPainting() {
+  if (!imageFile.value) {
+    alert('Выберите изображение')
+    return
+  }
+
+  const formData = new FormData()
+
+  formData.append('title', title.value)
+  formData.append('year', String(year.value ?? ''))
+  formData.append('image', imageFile.value)
+  formData.append('description', description.value)
+  formData.append('author', author.value)
+
   await $fetch('/api/paintings', {
     method: 'POST',
-    body: {
-      title: title.value,
-      year: year.value,
-      image_url: image_url.value,
-      description: description.value,
-      author: author.value
-    }
+    body: formData
   })
 
   title.value = ''
   year.value = null
-  image_url.value = ''
   description.value = ''
   author.value = ''
+  imageFile.value = null
+
+  if (fileInput.value) {
+    fileInput.value.value = ''
+  }
 
   await refresh()
 }
+
 async function deletePainting(id: number) {
   await $fetch(`/api/paintings/${id}`, {
     method: 'DELETE'

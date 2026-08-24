@@ -2,15 +2,7 @@ import sharp from 'sharp'
 import { randomUUID } from 'node:crypto'
 import { put } from '@vercel/blob'
 
-export async function optimizeImage(imageUrl: string) {
-  const response = await fetch(imageUrl)
-
-  if (!response.ok) {
-    throw new Error(`Failed to download image: ${response.status}`)
-  }
-
-  const buffer = Buffer.from(await response.arrayBuffer())
-
+export async function optimizeImage(buffer: Buffer) {
   const filename = `${randomUUID()}.webp`
 
   const optimizedImage = await sharp(buffer)
