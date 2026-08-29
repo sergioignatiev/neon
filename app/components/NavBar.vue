@@ -37,6 +37,9 @@ const navigation = [
   },
   {title:"Paintings",
     path:"/paintings"
+  },{
+    title:"Paintings Admin",
+    path:"/paintings/admin"
   }
 ]
 </script>
